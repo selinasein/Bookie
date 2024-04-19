@@ -14,9 +14,9 @@ export const notes = pgTable(
   {
     id: serial("id").primaryKey(),
     userId: text("user_id").notNull(),
+    username: varchar("username", { length: 100 }).notNull(),
     title: varchar("title", { length: 100 }).notNull(),
-    content: text("content").notNull(),
-    rating: numeric("rating", { precision: 2, scale: 1 }).notNull(),
+    content: varchar("content", { length: 500 }).notNull(),
     bookId: text("book_id").notNull(),
     bookImage: text("book_image").notNull(),
     bookTitle: varchar("book_title", { length: 100 }).notNull(),
@@ -36,4 +36,3 @@ export const notes = pgTable(
 // export const noteRelations = relations(notes,({one})=>({
 //   user: one(users, {fields: [notes.userId], })
 // }) )
-

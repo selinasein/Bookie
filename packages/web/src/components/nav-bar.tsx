@@ -3,20 +3,17 @@ import { useKindeAuth } from "@kinde-oss/kinde-auth-react";
 // import Login from "../routes/authenticated";
 
 export default function NavBar({}: {}) {
-  // const { isAuthenticated }= useKindeAuth();
-  const isAuthenticated = true;
-  const { logout } = useKindeAuth();
+  const { isAuthenticated, logout, login, user } = useKindeAuth();
 
   const auth = {
-    user: "selinapark",
-    email: "selinapark@gmail.com",
-    avatar:
-      "https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg",
+    user: user?.given_name,
+    email: user?.email,
+    avatar: user?.picture || "/images/default-user.png",
   };
 
   return (
     <>
-      <div className="bg-gray-50 text-black/50 navbar absolute top-0 px-10 py-5 bg-transparent">
+      <div className="bg-gray-50 text-black/50 navbar top-0 px-10 py-5">
         <div className="navbar-start">
           <Link to="/" className="ml-3">
             <h1 className="text-4xl font-serif">Bookie.</h1>
@@ -28,19 +25,11 @@ export default function NavBar({}: {}) {
               <Link to="/dashboard">Dashboard</Link>
             </li>
             <li>
-              <details>
-                <summary>Feed</summary>
-                <ul className="p-2">
-                  <li>
-                    <Link to="/notes">Notes</Link>
-                  </li>
-                  <li>
-                    <Link to="pictures">Pictures</Link>
-                  </li>
-                </ul>
-              </details>
+              {isAuthenticated ? <Link to="/mynotes">My Notes</Link> : null}
             </li>
-            <li>{isAuthenticated ? <Link to="/liked">Liked</Link> : null}</li>
+            <li>
+              {isAuthenticated ? <Link to="/liked">Liked Notes</Link> : null}
+            </li>
           </ul>
         </div>
         <div className="navbar-end">
@@ -61,16 +50,9 @@ export default function NavBar({}: {}) {
                 </div>
                 <ul
                   tabIndex={0}
-                  className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+                  className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52 items-start"
                 >
-                  <li>
-                    <Link to="profile" className="justify-between">
-                      Profile
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="setting">Settings</Link>
-                  </li>
+                  <li className="ml-3"> Hi, {auth.user}</li>
                   <li>
                     <button
                       onClick={() => {
@@ -84,7 +66,13 @@ export default function NavBar({}: {}) {
               </div>
             </>
           ) : (
-            <Link to="login">Log In</Link>
+            <button
+              onClick={() => {
+                login();
+              }}
+            >
+              Log In
+            </button>
           )}
         </div>
       </div>

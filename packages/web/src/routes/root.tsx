@@ -1,11 +1,12 @@
 import { useEffect } from "react";
 import Booklist from "../components/booklist";
 import { Link } from "react-router-dom";
-// import { useKindeAuth } from "@kinde-oss/kinde-auth-react";
+import { useKindeAuth } from "@kinde-oss/kinde-auth-react";
 
 export default function Root({}) {
-  // const { isAuthenticated } = useKindeAuth();
-  const isAuthenticated = true;
+  const { isAuthenticated } = useKindeAuth();
+  const { login } = useKindeAuth();
+  // const isAuthenticated = true;
 
   useEffect(() => {
     const scrollers = document.querySelectorAll(".scroller");
@@ -63,12 +64,14 @@ export default function Root({}) {
                 >
                   Go to Dashboard
                 </Link>
-                <Link
-                  to={"/login"}
+                <button
+                  onClick={() => {
+                    login();
+                  }}
                   className="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white text-black/50"
                 >
                   Log in
-                </Link>
+                </button>
               </>
             )}
           </nav>

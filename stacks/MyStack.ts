@@ -1,4 +1,3 @@
-//This is where I write the SST API construct.
 import { StackContext, Api, StaticSite } from "sst/constructs";
 
 export function API({ stack }: StackContext) {
@@ -6,6 +5,7 @@ export function API({ stack }: StackContext) {
 
   const audience = `api-Bookie-${stack.stage}`;
   const api = new Api(stack, "api", {
+    cors: true,
     authorizers: {
       myAuthorizer: {
         type: "jwt",
@@ -25,11 +25,18 @@ export function API({ stack }: StackContext) {
     },
     routes: {
       "GET /": "packages/functions/src/lambda.handler",
+      "GET /books/single/{bookTitle}/{author}": {
+        authorizer: "none",
+        function: {
+          handler: "packages/functions/src/books.handler",
+        },
+      },
       "GET /books/{title}": {
         authorizer: "none",
         function: {
           runtime: "container",
           handler: "packages/csharp/CSharpFunction",
+          timeout: "20 seconds",
         },
       },
       "GET /books/best": {
@@ -37,10 +44,14 @@ export function API({ stack }: StackContext) {
         function: {
           runtime: "container",
           handler: "packages/csharp/CSharpFunction",
+          timeout: "20 seconds",
         },
       },
-      // MANAGING NOTES (TYPESCRIPT-HONO)
-      // "GET /notes": "packages/functions/src/notes.handler",
+      "GET /note": "packages/functions/src/notes.handler",
+      "POST /note": "packages/functions/src/notes.handler",
+      "DELETE /note/{id}": "packages/functions/src/notes.handler",
+      "POST /note/{id}/likes": "packages/functions/src/notes.handler",
+      "DELETE /note/{id}/likes": "packages/functions/src/notes.handler",
     },
   });
 

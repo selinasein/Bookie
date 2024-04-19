@@ -13,8 +13,10 @@
     "vitest": "^1.4.0"
   },
   "dependencies": {
+    "@aws-sdk/client-ses": "^3.556.0",
     "@neondatabase/serverless": "^0.9.0",
     "drizzle-orm": "^0.30.8",
+    "hono": "^4.2.3",
     "zod": "^3.22.4"
   }
 }
