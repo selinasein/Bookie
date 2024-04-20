@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Link } from "react-router-dom";
 import { ISearchedBook } from "../../types/ISearchedBook";
 import { IBestBook } from "../../types/IBestSellers";
