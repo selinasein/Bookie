@@ -3,8 +3,8 @@ import { SendEmailCommand, SESClient } from "@aws-sdk/client-ses";
 export const sesClient = new SESClient({
   region: "us-west-2",
   credentials: {
-    accessKeyId: "AKIA5PO6JV2SZXG2EBBF",
-    secretAccessKey: "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",
+    accessKeyId: process.env.ACCESS_KEY_ID!,
+    secretAccessKey: process.env.ACCESS_KEY!,
   },
 });
 
@@ -12,8 +12,8 @@ export const createSendEmailCommand = (toAddress: string) => {
   var htmlBody = `<!DOCTYPE html>
       <html>
         <body>
-          <h1>A user added a comment to your note!!</h1>
-          <p>Hi there! Soneone just commented on a note of yours!</p>
+          <h1>You just created a new Note!</h1>
+          <p>Great job creating an all new note!</p>
         </body>
       </html>`;
 
@@ -30,7 +30,7 @@ export const createSendEmailCommand = (toAddress: string) => {
       },
       Subject: {
         Charset: "UTF-8",
-        Data: "A user added a comment to your note!!",
+        Data: "You added a new note!",
       },
     },
     Source: "neulmisscj@gmail.com",

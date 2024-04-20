@@ -5,75 +5,88 @@ import { NoteCard } from "../components/note-card";
 import NoData from "../components/no-data";
 import readGif from "/animation/Reading.gif";
 import loadGif from "/animation/Loading.gif";
-
-const deleteLike = async (noteId: number) => {
-  const { getToken } = useKindeAuth();
-  const token = await getToken();
-
-  const headers: HeadersInit = new Headers({
-    "Content-Type": "application/json",
-  });
-
-  if (token) {
-    headers.set("Authorization", `${token}`);
-  }
-
-  try {
-    const response = await fetch(
-      `${import.meta.env.VITE_APP_API_URL}/note/${noteId}/likes`,
-      {
-        method: "DELETE",
-        headers: headers,
-      }
-    );
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-    console.log("Like deleted successfully");
-  } catch (error) {
-    console.error("Failed to delete like:", error);
-  }
-};
+import { useNavigate, useRevalidator } from "react-router-dom";
 
 export function MyNotes() {
   const { getToken } = useKindeAuth();
-  const { user } = useKindeAuth();
+  const { user, isAuthenticated } = useKindeAuth();
   const [notes, setNotes] = useState<INote[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  let revalidator = useRevalidator();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchNotes = async () => {
-      const token = await getToken();
-      const headers = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      };
-
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_APP_API_URL}/note`,
-          {
-            method: "GET",
-            headers: headers,
-          }
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch notes");
-        }
-        const data = await response.json();
-        setNotes(data.notes);
-      } catch (error) {
-        console.error("Error fetching notes:", error);
-      }
+  const fetchNotes = async () => {
+    const token = await getToken();
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     };
 
+    try {
+      const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/note`, {
+        method: "GET",
+        headers: headers,
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch notes");
+      }
+      const data = await response.json();
+      setNotes(data.notes);
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, []);
+
+  const deleteNote = async (noteId: number) => {
+    const token = await getToken();
+
+    setLoading(true);
+
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
+
+    if (token) {
+      headers["Authorization"] = `${token}`;
+    }
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_APP_API_URL}/note/${noteId}`,
+        {
+          method: "DELETE",
+          headers: headers,
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log(data);
+
+      alert("Note deleted successfully!");
+      await fetchNotes();
+    } catch (error) {
+      console.error("Failed to delete note:", error);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
     fetchNotes();
   }, []);
 
   return (
-    <div className="text-black/50 flex justify-center items-center flex-col pb-10">
+    <div className="text-black/50 flex justify-center items-center flex-col pb-10 m-3">
       <div className="grid md:grid-cols-2 lg:mx-32 gap-3">
-        <div className="flex flex-col text-center justify-center content-center gap-3 m-4">
-          <h2 className="text-5xl font-serif">
+        <div className="flex flex-col text-center justify-center content-center md:gap-3 m-4">
+          <h2 className="text-2xl md:text-5xl font-serif">
             {user?.given_name}, Here are your notes
           </h2>
           <p>
@@ -89,11 +102,13 @@ export function MyNotes() {
       <div className="divider" />
       {notes ? (
         notes.length > 0 ? (
-          notes.map((note) => (
+          notes.map((note, i) => (
             <NoteCard
               key={note.id}
+              i={i}
               note={note}
-              deleteNote={() => deleteLike(note.id)}
+              deleteFunction={() => deleteNote(note.id)}
+              loading={loading}
             />
           ))
         ) : (

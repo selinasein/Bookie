@@ -5,8 +5,7 @@ import { cors } from "hono/cors";
 import { db } from "../../core/src/db";
 import { notes as notesTable } from "../../core/src/db/schema/notes";
 import { likes as likesTable } from "../../core/src/db/schema/likes";
-import { and, eq, desc } from "drizzle-orm";
-
+import { and, eq, desc, like } from "drizzle-orm";
 import { sesClient, createSendEmailCommand } from "../../core/src/aws-ses";
 import { authMiddleware } from "../../core/src/auth";
 
@@ -25,6 +24,33 @@ app.get("/note", authMiddleware, async (c) => {
   return c.json({ notes });
 });
 
+app.get("/note/liked", authMiddleware, async (c) => {
+  const userId = c.var.userId;
+
+  try {
+    const likedNotes = await db
+      .select()
+      .from(likesTable)
+      .where(eq(likesTable.userId, userId));
+
+    let notes = [];
+
+    for (const note of likedNotes) {
+      const result = await db
+        .select()
+        .from(notesTable)
+        .where(eq(notesTable.id, note.noteId));
+
+      notes.push(...result);
+    }
+
+    return c.json({ notes });
+  } catch (error) {
+    console.error("Failed to retrieve liked notes:", error);
+    return c.json({ error: "Failed to retrieve liked notes" });
+  }
+});
+
 app.post("/note", authMiddleware, async (c) => {
   const { title, content, bookId, bookImage, bookTitle, bookAuthor, username } =
     await c.req.json();
@@ -41,7 +67,9 @@ app.post("/note", authMiddleware, async (c) => {
   };
   try {
     const newNote = await db.insert(notesTable).values(note).returning();
-    const sendEmailCommand = createSendEmailCommand("neulmisscj@gmail.com");
+    const sendEmailCommand = createSendEmailCommand(
+      "testforselinatosam@outlook.com"
+    );
     await sesClient.send(sendEmailCommand);
     return c.json({ note: newNote, userId });
   } catch (error) {

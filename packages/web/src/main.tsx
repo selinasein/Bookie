@@ -16,6 +16,7 @@ import { KindeProvider } from "@kinde-oss/kinde-auth-react";
 import NavBar from "./components/nav-bar";
 import { getBook, SingleBook } from "./routes/singlebook";
 import { MyNotes } from "./routes/mynotes";
+import LikedNotes from "./routes/likednotes";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -29,6 +30,7 @@ const router = createBrowserRouter(
           path="/book/single/:bookTitle/:author"
         />
         <Route element={<MyNotes />} path="/mynotes" />
+        <Route element={<LikedNotes />} path="/likednotes" />
       </Route>
     </>
   )

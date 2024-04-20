@@ -20,6 +20,8 @@ export function API({ stack }: StackContext) {
       function: {
         environment: {
           DRIZZLE_DATABASE_URL: process.env.DRIZZLE_DATABASE_URL!,
+          ACCESS_KEY_ID: process.env.ACCESS_KEY_ID!,
+          ACCESS_KEY: process.env.ACCESS_KEY!,
         },
       },
     },
@@ -48,6 +50,7 @@ export function API({ stack }: StackContext) {
         },
       },
       "GET /note": "packages/functions/src/notes.handler",
+      "GET /note/liked": "packages/functions/src/notes.handler",
       "POST /note": "packages/functions/src/notes.handler",
       "DELETE /note/{id}": "packages/functions/src/notes.handler",
       "POST /note/{id}/likes": "packages/functions/src/notes.handler",

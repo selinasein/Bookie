@@ -1,6 +1,7 @@
 import { useKindeAuth } from "@kinde-oss/kinde-auth-react";
 import { useEffect, useState, ChangeEvent } from "react";
 import { useRevalidator } from "react-router-dom";
+import loadingbutton from "/animation/LoadingButton.gif";
 
 type NoteFormProps = {
   bookId: string;
@@ -23,6 +24,7 @@ export default function NoteForm({
   const [content, setContent] = useState("");
   const [isError, setIsError] = useState({ content: false, title: false });
   const [characterCount, setCharacterCount] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   let revalidator = useRevalidator();
 
@@ -75,6 +77,8 @@ export default function NoteForm({
   const addNoteHandler = async (e: any) => {
     e.preventDefault();
 
+    setLoading(true);
+
     try {
       const token = await getToken();
 
@@ -113,11 +117,12 @@ export default function NoteForm({
       setTitle("");
       setContent("");
       setCharacterCount(0);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="bg-white rounded-xl p-8 h-full">
+    <div className="bg-white rounded-xl p-8 w-full h-full">
       <form onSubmit={addNoteHandler} className="p-2">
         <h2 className="text-lg font-bold p-1">
           What do you think about this book?
@@ -130,6 +135,7 @@ export default function NoteForm({
             Title
           </label>
           <input
+            disabled={token === "" || isError.title || isError.content}
             name="title"
             type="text"
             placeholder="Summarize your thought in one line here ..."
@@ -145,6 +151,7 @@ export default function NoteForm({
             Content
           </label>
           <textarea
+            disabled={token === "" || isError.title || isError.content}
             className="textarea textarea-ghost h-52 text-sm text-black"
             name="content"
             placeholder="Write your thoughts here ..."
@@ -157,12 +164,22 @@ export default function NoteForm({
             {isError.content && errorMessage({ target: "Content", limit: 400 })}
           </div>
         </div>
-        <button
-          disabled={token === ""}
-          className="bg-purple-200 hover:bg-purple-300 w-24 p-1 rounded-xl text-center font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Add Note
-        </button>
+        {loading ? (
+          <button
+            disabled
+            className="bg-purple-200 w-24 p-3 rounded-xl text-center font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center "
+          >
+            <img src={loadingbutton} alt="loading" className="w-5 h-5" />
+          </button>
+        ) : (
+          <button
+            disabled={token === "" || isError.title || isError.content}
+            className="bg-purple-200 hover:bg-purple-300 w-24 p-3 rounded-xl text-center font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Add Note
+          </button>
+        )}
+
         <div className="text-right text-xs text-gray-500">
           Characters: {characterCount}
         </div>

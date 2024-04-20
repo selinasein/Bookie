@@ -3,9 +3,10 @@ import { ISearchedBook } from "../../types/ISearchedBook";
 import { IBestBook } from "../../types/IBestSellers";
 import { useBooks } from "../hooks/useBooks";
 import bookGif from "/animation/Book.gif";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import NoData from "../components/no-data";
 import { cutTitle } from "../utils/functions";
+import loadingbuttonGif from "/animation/LoadingButton.gif";
 
 export default function Dashboard({}) {
   const bestsResult = useBooks();
@@ -14,6 +15,7 @@ export default function Dashboard({}) {
   const [searchedBooks, setSearchedBooks] = useState<ISearchedBook[] | null>(
     null
   );
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (searchedBooks && searchedBooks.length > 0) {
@@ -25,6 +27,7 @@ export default function Dashboard({}) {
   }, [searchedBooks]);
 
   let bestSellers;
+
   if (typeof bestsResult === "string") {
     bestSellers = JSON.parse(bestsResult);
   } else {
@@ -38,6 +41,7 @@ export default function Dashboard({}) {
   const getBooksByTitle = async (e: React.FormEvent) => {
     e.preventDefault();
     setSearchedBooks(null);
+    setLoading(true);
     try {
       const response = await fetch(
         `${import.meta.env.VITE_APP_API_URL}/books/${bookTitle}`
@@ -49,8 +53,12 @@ export default function Dashboard({}) {
       const data = JSON.parse(json);
       console.log(data, "data");
       setSearchedBooks(data);
+      alert("Click the Search Tab to see the results!");
+      setBookTitle("");
     } catch (error) {
       console.error("Error fetching books by title:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -88,18 +96,26 @@ export default function Dashboard({}) {
                   className="w-full"
                 />
                 <button className="flex-shrink-0">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 16 16"
-                    fill="currentColor"
-                    className="w-4 h-4 opacity-70"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
-                      clipRule="evenodd"
+                  {loading ? (
+                    <img
+                      src={loadingbuttonGif}
+                      alt="loading"
+                      className="w-3 h-3 opacity-80"
                     />
-                  </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 16 16"
+                      fill="currentColor"
+                      className="w-4 h-4 opacity-70"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  )}
                 </button>
               </label>
             </form>
@@ -159,49 +175,62 @@ export default function Dashboard({}) {
           <input
             type="radio"
             name="Search"
+            id="search"
             role="tab"
             className="tab"
             aria-label="Search"
             checked={!checked}
             onClick={toggleChecked}
           />
-          <div role="tabpanel" className="tab-content p-10">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-32 md:gap-12">
+          <div role="tabpanel" className="tab-content p-4 mt-2">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-10">
               {searchedBooks
                 ? searchedBooks.map((b: ISearchedBook, i: number) => (
                     <div
-                      className="bg-blue-100 h-56 md:h-56 w-full rounded-3xl grid grid-cols-2 md:mt-11 md:gap-1"
+                      className="bg-blue-100 w-full h-full rounded-3xl grid grid-cols-2 md:gap-1 overflow-hidden"
                       key={i}
                     >
-                      <div className="relative m-10 md:m-4">
-                        <div className="absolute bottom-1 w-40">
-                          <img
-                            src={
-                              b.volumeInfo.imageLinks?.thumbnail ||
-                              b.volumeInfo.imageLinks?.smallThumbnail ||
-                              "/images/default-thumbnail.png"
-                            }
-                            alt={b.volumeInfo.title}
-                          />
-                        </div>
+                      <div
+                        className="relative object-cover w-full h-full"
+                        style={{ height: "100%", width: "100%" }}
+                      >
+                        <img
+                          src={
+                            b.volumeInfo.imageLinks?.thumbnail ||
+                            b.volumeInfo.imageLinks?.smallThumbnail ||
+                            "/images/default-thumbnail.png"
+                          }
+                          alt={b.volumeInfo.title}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                          className="object-cover overflow-hidden rounded-l-3xl m-0 p-0"
+                        />
                       </div>
-                      <div className="m-2 mr-5">
-                        <p className="font-bold text-lg">
-                          {cutTitle(b.volumeInfo.title)}
-                        </p>
-                        <p className="text-gray-500">
-                          {b.volumeInfo.authors?.[0] || "Unknown Author"}
-                        </p>
-                        <div className="h-20 md:h-16 text-wrap overflow-hidden mb-3">
-                          <p className="text-sm">
+
+                      <div className="flex flex-col h-full p-3">
+                        <div className="flex-1 overflow-hidden">
+                          <p className="font-bold text-lg">
+                            {cutTitle(b.volumeInfo.title)}
+                          </p>
+                          <p className="text-gray-500">
+                            {b.volumeInfo.authors?.[0] || "Unknown Author"}
+                          </p>
+                          <div
+                            className="overflow-auto text-xs mb-4"
+                            style={{ maxHeight: "calc(100% - 3rem)" }}
+                          >
                             {b.searchInfo?.textSnippet ||
                               "No description available."}
-                          </p>
+                          </div>
                         </div>
                         <Link
                           to={`/book/single/${b.volumeInfo.title}/${b.volumeInfo.authors[0]}`}
+                          className="w-full mt-auto"
                         >
-                          <button className="btn btn-neutral w-full">
+                          <button className="btn btn-neutral btn-sm w-full">
                             See More
                           </button>
                         </Link>

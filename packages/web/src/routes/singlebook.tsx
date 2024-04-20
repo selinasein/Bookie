@@ -1,11 +1,10 @@
-// @ts-nocheck
-import { useState } from "react";
 import { useLoaderData } from "react-router-dom";
 import NoteForm from "../components/note-form";
 import StickyNote from "../components/sticky-note";
 import NoData from "../components/no-data";
 
 import { useKindeAuth } from "@kinde-oss/kinde-auth-react";
+import { INote } from "../../types/INote";
 
 export async function getBook({ params }: any) {
   const bookId = params.bookTitle;
@@ -29,15 +28,16 @@ export async function getBook({ params }: any) {
 }
 
 export function SingleBook() {
+  // @ts-ignore
   const foundBook = useLoaderData().data;
+  // @ts-ignore
   const notes = useLoaderData().notes;
   const { user } = useKindeAuth();
   const userId = user?.id;
-  const [showNoteForm, setShowNoteForm] = useState(false);
 
   return (
     <>
-      <div className="bg-gray-50 text-black/50 p-10 grid grid-rows-3 grid-flow-col gap-4">
+      <div className="bg-gray-50 text-black/50 p-10 grid lg:grid-rows-3 lg:grid-flow-col gap-4">
         <div className="col-span-2">
           <h3 className="text-6xl font-bold font-serif">
             {foundBook.volumeInfo.title}
@@ -71,7 +71,7 @@ export function SingleBook() {
             <p>{foundBook.volumeInfo.description}</p>
           </div>
         </div>
-        <div className="row-span-3">
+        <div className="w-full lg:row-span-3 col-span-2 lg:col-span-1">
           <NoteForm
             bookId={foundBook.id}
             bookImage={foundBook.volumeInfo.imageLinks.thumbnail}
@@ -87,7 +87,7 @@ export function SingleBook() {
         </h3>
         <div className="flex flex-wrap items-center justify-center gap-3 p-5">
           {notes.length > 0 ? (
-            notes.map((note, i) => (
+            notes.map((note: INote, i: number) => (
               <StickyNote
                 note={note}
                 i={i}
