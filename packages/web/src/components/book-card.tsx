@@ -1,13 +1,7 @@
 import { Link } from "react-router-dom";
 import { cutTitle } from "../utils/functions";
-import { ISearchedBooks } from "../../types/ISearchedBook";
-import { IBestBook } from "../../types/IBestSellers";
 
-type BookCardProps = {
-  book: IBestBook | ISearchedBooks;
-};
-
-export default function BookCard({ book }: { book: BookCardProps }) {
+export default function BookCard({ book }: any) {
   const getImageSrc = () => {
     if ("book_image" in book) {
       return book.book_image;
